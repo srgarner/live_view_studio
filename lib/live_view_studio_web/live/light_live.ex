@@ -2,11 +2,13 @@ defmodule LiveViewStudioWeb.LightLive do
   use LiveViewStudioWeb, :live_view
 
   def mount(_params, _session, socket) do
+    IO.inspect(self(), label: "MOUNT")
     socket = assign(socket, brightness: 10)
     {:ok, socket}
   end
 
   def render(assigns) do
+    IO.inspect(self(), label: "RENDER")
     ~H"""
     <h1>Front Porch Light</h1>
     <div id="light">
@@ -21,6 +23,9 @@ defmodule LiveViewStudioWeb.LightLive do
       <button phx-click="down">
         <img src="/images/down.svg">
       </button>
+      <button phx-click="rando">
+        <img src="/images/fire.svg">
+      </button>
       <button phx-click="up">
         <img src="/images/up.svg">
       </button>
@@ -32,6 +37,7 @@ defmodule LiveViewStudioWeb.LightLive do
   end
 
   def handle_event("on", _, socket) do
+    IO.inspect(self(), label: "ON")
     socket = assign(socket, brightness: 100)
     {:noreply, socket}
   end
@@ -42,13 +48,17 @@ defmodule LiveViewStudioWeb.LightLive do
   end
 
   def handle_event("up", _, socket) do
-    socket = update(socket, :brightness, &(&1 + 10))
+    socket = update(socket, :brightness, &min(&1 + 10, 100))
     {:noreply, socket}
   end
 
   def handle_event("down", _, socket) do
-    socket = update(socket, :brightness, &(&1 - 10))
+    socket = update(socket, :brightness, &max(&1 - 10, 0))
     {:noreply, socket}
   end
 
+  def handle_event("rando", _, socket) do
+    socket = update(socket, :brightness, Enum.random(0..100))
+    {:noreply, socket}
+  end
 end
